@@ -1,0 +1,86 @@
+async function generate() {
+  const apiKey = document.getElementById("apiKey").value.trim();
+  const fileInput = document.getElementById("imageInput");
+  const loading = document.getElementById("loading");
+  const resultsDiv = document.getElementById("results");
+
+  if (!apiKey) {
+    loading.innerText = "⚠️ Please enter your Gemini API key.";
+    return;
+  }
+
+  if (!fileInput.files[0]) {
+    loading.innerText = "⚠️ Please select an image first.";
+    return;
+  }
+
+  loading.innerText = "⏳ Analyzing image...";
+  resultsDiv.style.display = "none";
+
+  const file = fileInput.files[0];
+  const base64 = await toBase64(file);
+
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: `You are an Adobe Stock metadata expert.
+Analyze this image and generate in this format:
+
+Title: [short SEO title under 70 characters]
+Keywords: [30–40 comma-separated keywords]
+Description: [2–3 sentence professional description]` },
+              { inline_data: { mime_type: file.type, data: base64 } }
+            ]
+          }]
+        })
+      }
+    );
+
+    const data = await response.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "❌ No result.";
+    
+    // Parse output
+    const titleMatch = text.match(/Title:(.*)/i);
+    const keywordsMatch = text.match(/Keywords:(.*)/i);
+    const descriptionMatch = text.match(/Description:(.*)/is);
+
+    document.getElementById("titleBox").innerText = titleMatch ? titleMatch[1].trim() : "Not found";
+    document.getElementById("keywordsBox").innerText = keywordsMatch ? keywordsMatch[1].trim() : "Not found";
+    document.getElementById("descriptionBox").innerText = descriptionMatch ? descriptionMatch[1].trim() : "Not found";
+
+    resultsDiv.style.display = "block";
+    loading.innerText = "";
+
+  } catch (err) {
+    loading.innerText = "❌ Error: " + err.message;
+  }
+}
+
+// Copy keywords to clipboard
+function copyKeywords() {
+  const keywords = document.getElementById("keywordsBox").innerText;
+  navigator.clipboard.writeText(keywords).then(() => {
+    alert("✅ Keywords copied to clipboard!");
+  });
+}
+
+// Convert file to Base64
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const base64String = reader.result.split(",")[1];
+      resolve(base64String);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+}
+
+

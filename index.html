@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adobe Stock Metadata Generator</title>
+</head>
+<body style="font-family: Arial; padding:20px; max-width:700px; margin:auto;">
+  <h2>Adobe Stock Title & Keywords Generator</h2>
+  <p>Upload an image and Gemini Vision will generate optimized metadata.</p>
+
+  <label>Enter your Gemini API Key (only needed once per session):</label><br>
+  <input type="password" id="apiKey" placeholder="Paste API key here" style="width:100%; padding:8px; margin:8px 0;"><br>
+
+  <input type="file" id="imageInput" accept="image/*"><br><br>
+  <button onclick="generate()">Generate Metadata</button>
+
+  <h3>Result:</h3>
+  <div id="results" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px;">
+    <p><b>Title:</b></p>
+    <pre id="titleBox" style="background:#fff; padding:8px; border-radius:5px;"></pre>
+
+    <p><b>Keywords:</b> 
+      <button onclick="copyKeywords()" style="margin-left:10px; padding:5px 10px;">📋 Copy</button>
+    </p>
+    <pre id="keywordsBox" style="background:#fff; padding:8px; border-radius:5px;"></pre>
+
+    <p><b>Description:</b></p>
+    <pre id="descriptionBox" style="background:#fff; padding:8px; border-radius:5px;"></pre>
+  </div>
+
+  <p id="loading" style="color:gray;"></p>
+
+  <script src="script.js"></script>
+</body>
+</html>
